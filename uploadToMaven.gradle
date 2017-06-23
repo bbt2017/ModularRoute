@@ -1,0 +1,44 @@
+apply plugin: 'maven'
+
+def IS_RELEASE = false
+
+def GROUPID = "com.lch.route"
+def ARTIFACTID = "plugin"
+def PACKAGING = "jar"
+
+
+uploadArchives {
+    configuration = configurations.archives
+
+    repositories {
+        mavenDeployer {
+            if (IS_RELEASE) {
+
+                pom.project {
+                    version '1.0.0'
+                    artifactId ARTIFACTID
+                    groupId GROUPID
+                    packaging PACKAGING
+
+                }
+            } else {
+
+                repository(url: uri("/Users/lichenghang/.m2/repository"))
+                // repository(url: uri("C:\\Users\\Administrator\\.m2\\repository"))
+
+                pom.project {
+                    version '2.0.19'
+                    artifactId ARTIFACTID
+                    groupId GROUPID
+                    packaging PACKAGING
+
+                }
+
+
+            }
+        }
+    }
+}
+
+sourceCompatibility = 1.7
+targetCompatibility = 1.7
