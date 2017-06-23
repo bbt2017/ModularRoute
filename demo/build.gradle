@@ -1,12 +1,12 @@
 apply plugin: 'com.android.application'
-apply plugin: 'com.babytree.route.plugin'
+apply plugin: 'com.lch.route.plugin'
 
 android {
     compileSdkVersion rootProject.ext.compileSdkVersion
     buildToolsVersion rootProject.ext.buildToolsVersion
 
     defaultConfig {
-        applicationId "com.babytree.demo"
+        applicationId "com.lch.demo"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1

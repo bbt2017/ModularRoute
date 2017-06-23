@@ -9,7 +9,7 @@ buildscript {
         classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.0'
         classpath 'com.android.tools.build:gradle:2.2.2'
 
-        classpath 'com.babytree.route:route-plugin:+'
+        classpath 'com.lch.route:route-plugin:+'
     }
 
     allprojects {

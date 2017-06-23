@@ -2,7 +2,7 @@ apply plugin: 'maven'
 
 def IS_RELEASE = false
 
-def GROUPID = "com.babytree.route"
+def GROUPID = "com.lch.route"
 def ARTIFACTID = "route-runtime"
 def PACKAGING = "jar"
 
@@ -23,8 +23,8 @@ uploadArchives {
                 }
             } else {
 
-                ///repository(url: uri("/Users/lichenghang/.m2/repository"))
-                 repository(url: uri("C:\\Users\\Administrator\\.m2\\repository"))
+                repository(url: uri("/Users/lichenghang/.m2/repository"))
+                 //repository(url: uri("C:\\Users\\Administrator\\.m2\\repository"))
 
                 pom.project {
                     version '1.0.6'
