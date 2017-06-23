@@ -1,5 +1,5 @@
 apply plugin: 'com.android.application'
-apply plugin: 'com.lch.route.plugin'
+apply plugin: 'com.babytree.route.plugin'
 
 android {
     compileSdkVersion rootProject.ext.compileSdkVersion

@@ -33,4 +33,36 @@ RouteManager.service("myapp://login")
 ```
 
 ## 集成方法
-待续
+root project下的build.gradle添加：
+```
+buildscript {
+    repositories {
+        jcenter()
+        mavenCentral() 
+    }
+    dependencies {
+        classpath 'com.babytree.route:route-plugin:+'
+        ...
+    }
+
+    allprojects {
+        repositories {
+            jcenter()
+
+            mavenCentral()
+        }
+    }
+}
+```
+app的build.gradle添加：
+```
+dependencies {
+   
+    compile 'com.babytree.route:route-runtime:+'
+   
+}
+
+apply plugin: 'com.babytree.route.plugin'
+```
+
+备注:目前还未上传到公共maven库。
