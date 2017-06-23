@@ -34,7 +34,7 @@ RouteManager.service("myapp://login")
 
 ## 集成方法
 root project下的build.gradle添加：
-```
+```gradle
 buildscript {
     repositories {
         jcenter()
@@ -55,7 +55,7 @@ buildscript {
 }
 ```
 app的build.gradle添加：
-```
+```gradle
 dependencies {
    
     compile 'com.babytree.route:route-runtime:+'
