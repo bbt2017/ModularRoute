@@ -4,11 +4,9 @@ import com.android.annotations.NonNull
 import com.android.annotations.Nullable
 import com.android.build.api.transform.*
 import com.android.build.gradle.internal.pipeline.TransformManager
-import com.lch.route.plugin.utils.ModifyFiles
 import com.lch.route.plugin.util.Logg
-import com.lch.route.plugin.utils.DataHelper
-import com.lch.route.plugin.utils.Log
-import com.lch.route.plugin.utils.Util
+import com.lch.route.plugin.utils.Config
+import com.lch.route.plugin.utils.ModifyUtil
 import com.lch.route.plugin.visitor.Router_Dump
 import groovy.io.FileType
 import org.apache.commons.codec.digest.DigestUtils
@@ -19,7 +17,7 @@ public class InjectTransform extends Transform {
 
     @Override
     String getName() {
-        return "HiBeaver"
+        return "Route"
     }
 
     @Override
@@ -29,9 +27,9 @@ public class InjectTransform extends Transform {
 
     @Override
     Set<QualifiedContent.Scope> getScopes() {
-        if (DataHelper.ext.projectType == DataHelper.TYPE_APP) {
+        if (Config.ext.projectType == Config.TYPE_APP) {
             return TransformManager.SCOPE_FULL_PROJECT
-        } else if (DataHelper.ext.projectType == DataHelper.TYPE_LIB) {
+        } else if (Config.ext.projectType == Config.TYPE_LIB) {
             return TransformManager.SCOPE_FULL_LIBRARY
         }
         return TransformManager.SCOPE_FULL_PROJECT
@@ -51,9 +49,9 @@ public class InjectTransform extends Transform {
             @Nullable TransformOutputProvider outputProvider,
             boolean isIncremental) throws IOException, TransformException, InterruptedException {
 
-        Log.info "==============transform enter=============="
-        long begin = System.currentTimeMillis();
+        Logg.i("==============route transform enter==============")
 
+        long begin = System.currentTimeMillis();
 
         inputs.each { TransformInput input ->
 
@@ -64,7 +62,7 @@ public class InjectTransform extends Transform {
 
                 String jarName = jarInput.file.name;
                 String jar_absolutePath = jarInput.file.absolutePath;
-                Logg.i("#####jar:" + jar_absolutePath);
+                Logg.i("jar:" + jar_absolutePath);
 
                 /** 重名名输出文件,因为可能同名,会覆盖*/
                 def hexName = DigestUtils.md5Hex(jar_absolutePath).substring(0, 8);
@@ -79,10 +77,8 @@ public class InjectTransform extends Transform {
                 if (isNeedModifyJar(jarInput.file)) {
                     modifiedJar = modifyJarFile(jarInput.file, context.getTemporaryDir());
                 } else {
-                    Logg.e("===============exclude jar:" + jar_absolutePath)
-
+                    Logg.e("exclude jar:" + jar_absolutePath)
                 }
-
 
                 if (modifiedJar == null) {
                     FileUtils.copyFile(jarInput.file, dest);
@@ -100,7 +96,7 @@ public class InjectTransform extends Transform {
 
                 File dest = outputProvider.getContentLocation(directoryInput.name, directoryInput.contentTypes, directoryInput.scopes, Format.DIRECTORY);
                 File dir = directoryInput.file
-                Logg.i("###dir:" + dir.absolutePath);
+                Logg.i("dir:" + dir.absolutePath);
 
 
                 if (dir) {
@@ -121,16 +117,16 @@ public class InjectTransform extends Transform {
                         FileUtils.copyInputStreamToFile(new ByteArrayInputStream(bytes), new File(dest, "com/lch/route/Route_.class"))
                     }
 
-
                     FileUtils.copyDirectory(directoryInput.file, dest);
 
                     modifyMap.entrySet().each {
                         Map.Entry<String, File> en ->
                             File target = new File(dest.absolutePath + en.getKey());
-                            Log.info(target.getAbsolutePath());
+                            Logg.i(target.getAbsolutePath());
                             if (target.exists()) {
                                 target.delete();
                             }
+
                             FileUtils.copyFile(en.getValue(), target);
                             saveModifiedJarForCheck(en.getValue());
                             en.getValue().delete();
@@ -138,15 +134,14 @@ public class InjectTransform extends Transform {
                 }
             }
 
-            Logg.e("@@@monitor sdk transform spend time:" + (System.currentTimeMillis() - begin));
-
+            Logg.e("@@@transform spend time:" + (System.currentTimeMillis() - begin));
 
         }
     }
 
     private static boolean isNeedModifyJar(File jar) {
 
-        List<String> excludeJarName = Util.project.route.excludeJarName;
+        List<String> excludeJarName = Config.project.route.excludeJarName;
 
         for (String value : excludeJarName) {
             boolean isContain = jar.absolutePath.contains(value);
@@ -162,7 +157,7 @@ public class InjectTransform extends Transform {
 
 
     private static void saveModifiedJarForCheck(File optJar) {
-        File dir = DataHelper.ext.hiBeaverDir;
+        File dir = Config.ext.routeDir;
         File checkJarFile = new File(dir, optJar.getName());
         if (checkJarFile.exists()) {
             checkJarFile.delete();
@@ -173,7 +168,7 @@ public class InjectTransform extends Transform {
 
     private static File modifyJarFile(File jarFile, File tempDir) {
         if (jarFile) {
-            return ModifyFiles.modifyJar(jarFile, null, tempDir, true)
+            return ModifyUtil.modifyJar(jarFile, tempDir, true)
 
         }
         return null;
@@ -183,10 +178,10 @@ public class InjectTransform extends Transform {
     private static File modifyClassFile(File dir, File classFile, File tempDir) {
         File modified = null;
         try {
-            String className = Util.path2Classname(classFile.absolutePath.replace(dir.absolutePath + File.separator, ""));
+            String className = ModifyUtil.path2Classname(classFile.absolutePath.replace(dir.absolutePath + File.separator, ""));
             byte[] sourceClassBytes = IOUtils.toByteArray(new FileInputStream(classFile));
 
-            byte[] modifiedClassBytes = ModifyClassUtil.modifyClasses(className, sourceClassBytes);
+            byte[] modifiedClassBytes = ModifyUtil.modifyClasses(className, sourceClassBytes);
             if (modifiedClassBytes) {
                 modified = new File(tempDir, className.replace('.', '') + '.class')
                 if (modified.exists()) {

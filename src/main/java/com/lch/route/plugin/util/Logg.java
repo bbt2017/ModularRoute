@@ -6,11 +6,13 @@ package com.lch.route.plugin.util;
 
 public class Logg {
 
+    private static final String TAG = "[RouteSDK]";
+
     public static void e(String msg) {
-        System.err.println(msg);
+        System.err.println(TAG + ":" + msg);
     }
 
     public static void i(String msg) {
-        System.out.println(msg);
+        System.out.println(TAG + ":" + msg);
     }
 }

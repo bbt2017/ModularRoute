@@ -45,6 +45,7 @@ public class RouteServiceVisitor extends ClassVisitor implements Opcodes {
 
     private class RouteAnnotationVisitor extends AnnotationVisitor {
 
+        private static final String ROUTE_SERVICE_ANNO_DESC = "Lcom/lch/route/RouteServiceAnnotation;";
 
         private String desc;
 
@@ -60,9 +61,8 @@ public class RouteServiceVisitor extends ClassVisitor implements Opcodes {
         @Override
         public void visit(String name, Object value) {
 
-            if (desc.equals("Lcom/lch/route/RouteServiceAnnotation;") && name.equals("serviceInterface")) {
-                Logg.e("visitA=======================:" + name + "#" + value + "#" + desc + "#" + classname);//serviceInterface,Lbruce/com/testhibeaver/test/HomeService;
-
+            if (desc.equals(ROUTE_SERVICE_ANNO_DESC) && name.equals("serviceInterface")) {
+                Logg.e("visit annotation:" + name + "#" + value + "#" + desc + "#" + classname);
 
                 sv.put(value.toString(), classname.replaceAll("/", "."));
             }
