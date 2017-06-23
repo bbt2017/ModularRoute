@@ -1,1 +1,1 @@
-include ':route-runtime'
+include ':route-runtime', ':demo'

@@ -1,11 +1,34 @@
 buildscript {
     repositories {
         jcenter()
+        maven { url 'https://jitpack.io' }
+
+        mavenLocal()
     }
     dependencies {
         classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.0'
+        classpath 'com.android.tools.build:gradle:2.2.2'
+
+        classpath 'com.babytree.route:route-plugin:+'
+    }
+
+    allprojects {
+        repositories {
+            jcenter()
+
+            mavenLocal()
+        }
     }
 }
+
+
+ext {
+    compileSdkVersion = 25
+    buildToolsVersion = "25.0.0"
+    minSdkVersion = 16
+    targetSdkVersion = 25
+}
+
 apply plugin: 'groovy'
 apply plugin: 'maven'
 apply plugin: 'com.jfrog.bintray'
