@@ -1,7 +1,7 @@
-#ModularRoute
-##简介
+# ModularRoute
+## 简介
 用于实现模块化开发各个模块之间的解耦通信。使各个模块不存在相互的类依赖，直接以path的形式实现相互调用。
-##使用示例
+## 使用示例
 1. 定义一个对外提供的服务
 ```java
 package com.babytree.demo;
@@ -32,5 +32,5 @@ RouteManager.service("myapp://login")
                 .invoke();
 ```
 
-##集成方法
+## 集成方法
 待续
