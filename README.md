@@ -4,7 +4,7 @@
 ## 使用示例
 1. 定义一个对外提供的服务
 ```java
-package com.babytree.demo;
+package com.lch.demo;
 
 import android.util.Log;
 
@@ -20,6 +20,7 @@ public class LoginModuleService {
         Log.e("test", name + "," + pwd);
     }
 }
+
 
 ```
 ---
@@ -41,7 +42,7 @@ buildscript {
         mavenCentral() 
     }
     dependencies {
-        classpath 'com.babytree.route:route-plugin:+'
+        classpath 'com.lch.route:route-plugin:+'
         ...
     }
 
@@ -58,11 +59,11 @@ app的build.gradle添加：
 ```gradle
 dependencies {
    
-    compile 'com.babytree.route:route-runtime:+'
+    compile 'com.lch.route:route-runtime:+'
    
 }
 
-apply plugin: 'com.babytree.route.plugin'
+apply plugin: 'com.lch.route.plugin'
 ```
 
 备注:目前还未上传到公共maven库。
