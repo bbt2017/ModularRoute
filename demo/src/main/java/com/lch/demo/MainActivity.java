@@ -25,11 +25,11 @@ public class MainActivity extends AppCompatActivity {
 
 
         try {
-            RouteManager.route("myapp://com.demo.account/register?params={'name':'ch','pwd':'123'}");
+           boolean isRegisterSuccess= RouteManager.route("myapp://com.demo.account/register?params={'name':'ch','pwd':'123'}");
         } catch (Exception e) {
             e.printStackTrace();
         }
 
-        
+
     }
 }

@@ -16,7 +16,8 @@ public class AccountModuleService {
         Log.e("test", name + "," + pwd);
     }
 
-    public void register(JSONObject params) {
+    public boolean register(JSONObject params) {
         Log.e("test", params.optString("name") + "/" + params.optString("pwd"));
+        return true;
     }
 }
