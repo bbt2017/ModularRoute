@@ -12,10 +12,24 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        RouteManager.service("myapp://login")
-                .methodName("login")
-                .argTypes(String.class, String.class)
-                .args("lisi", "123456")
-                .invoke();
+        try {
+            RouteManager.service("com.demo.account")
+                    .methodName("login")
+                    .args("lisi", "123456")
+                    .invoke();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+
+
+
+        try {
+            RouteManager.route("myapp://com.demo.account/register?params={'name':'ch','pwd':'123'}");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        
     }
 }
