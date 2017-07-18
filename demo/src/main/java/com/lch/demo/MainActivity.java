@@ -13,7 +13,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         try {
-            RouteManager.service("com.demo.account")
+            RouteManager.service("mt")
                     .methodName("login")
                     .args("lisi", "123456")
                     .invokeDirect();
@@ -23,7 +23,7 @@ public class MainActivity extends AppCompatActivity {
 
 
         try {
-            boolean isRegisterSuccess = RouteManager.route("myapp://com.babytree/mt/register?name=lich&age=100");
+            boolean isRegisterSuccess = RouteManager.route("myapp://com.lch/mt/register?name=lich&age=100");
         } catch (Exception e) {
             e.printStackTrace();
         }
