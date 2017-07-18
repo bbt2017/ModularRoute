@@ -51,7 +51,7 @@ RouteManager.service("mt")
 
 ```java
 //通过path调用。path必须符合规定格式：schema://host/serviceName/methodName?name=xx&age=12
-//params对应的值为json对象格式。同步调用支持返回值。
+//同步调用支持返回值。
 boolean isRegisterSuccess = RouteManager.route("myapp://com.lch/mt/register?name=lich&age=100");
 ```
 
