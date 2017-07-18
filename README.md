@@ -6,30 +6,35 @@
 1. 定义一个对外提供的服务
 
 ```java
-package com.lch.demo;
-
-import android.util.Log;
-
-import com.lch.route.RouteServiceAnnotation;
-
-import org.json.JSONObject;
 
 /**
  * Created by Administrator on 2017/6/23.
  */
-@RouteServiceAnnotation(serviceInterface = "com.demo.account")
+@RouteServiceAnnotation(serviceInterface = "mt")
 public class AccountModuleService {
 
+    /**
+     * 使用方法名进行调用。这时可以传任意参数。
+     *
+     * @param name
+     * @param pwd
+     */
     public void login(String name, String pwd) {
         Log.e("test", name + "," + pwd);
     }
 
-    public boolean register(JSONObject params) {
-        Log.e("test", params.optString("name") + "/" + params.optString("pwd"));
+    /**
+     * 使用路由path方式调用必须要加{@code @RouteMethod}注解来说明path中的方法名到服务方法名的映射。
+     *
+     * @param params 路由path方式调用时参数永远是Map<String, String>
+     * @return
+     */
+    @RouteMethod("register")
+    public boolean registerImpl(Map<String, String> params) {
+        Log.e("test", params.get("name") + "/" + params.get("age"));
         return true;
     }
 }
-
 
 ```
 ---
@@ -38,16 +43,16 @@ public class AccountModuleService {
 
 ```java
 //通过服务名和方法名调用，这种方式支持任何类型参数。同步调用支持返回值。
-RouteManager.service("com.demo.account")
+RouteManager.service("mt")
                     .methodName("login")
                     .args("lisi", "123456")
-                    .invoke();
+                    .invokeDirect();
 ```
 
 ```java
-//通过path调用。path必须符合规定格式：schema://serviceName/methodName?params={}
+//通过path调用。path必须符合规定格式：schema://host/serviceName/methodName?name=xx&age=12
 //params对应的值为json对象格式。同步调用支持返回值。
-boolean isRegisterSuccess=RouteManager.route("myapp://com.demo.account/register?params={'name':'ch','pwd':'123'}");
+boolean isRegisterSuccess = RouteManager.route("myapp://com.lch/mt/register?name=lich&age=100");
 ```
 
 
