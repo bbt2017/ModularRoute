@@ -1,11 +1,14 @@
 package com.lch.route;
 
 import android.net.Uri;
+import android.text.TextUtils;
 import android.util.Log;
 
-import org.json.JSONObject;
-
 import java.lang.reflect.Method;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Created by lichenghang on 2017/5/28.
@@ -32,8 +35,38 @@ public class RouteManager {
 
     }
 
-    private static Object callMethod(String serviceName, String methodName, Object[] args, Class<?>... parameterTypes) throws Exception {
+    private static Object callMethodByPath(String serviceName, String methodName, Object[] args) throws Exception {
 
+        Object sv = getService(serviceName);
+        Method[] methods = sv.getClass().getDeclaredMethods();
+        Method mappedMethod = null;
+
+        for (Method method : methods) {
+            RouteMethod anno = method.getAnnotation(RouteMethod.class);
+            if (anno == null) {
+                continue;
+            }
+            String routeMethodName = anno.value();
+            if (TextUtils.isEmpty(routeMethodName)) {
+                continue;
+            }
+
+            if (routeMethodName.equals(methodName)) {
+                mappedMethod = method;
+                break;
+            }
+        }
+
+        if (mappedMethod == null) {
+            throw new IllegalStateException("cannot find mapped method for:" + methodName + ", in service class:" + sv.getClass().getName());
+        }
+
+        mappedMethod.setAccessible(true);
+
+        return mappedMethod.invoke(sv, args);
+    }
+
+    private static Object callMethodDirect(String serviceName, String methodName, Object[] args, Class<?>... parameterTypes) throws Exception {
         Object sv = getService(serviceName);
         Method m = sv.getClass().getDeclaredMethod(methodName, parameterTypes);
         m.setAccessible(true);
@@ -46,19 +79,30 @@ public class RouteManager {
     }
 
 
-    public static <T> T route(String url) throws Exception {//schema://serviceName/methodName?params={}
+    public static <T> T route(String url) throws Exception {//schema://host/serviceName/methodName?name=xx&age=12
 
         Uri uri = Uri.parse(url);
-        String serviceName = uri.getAuthority();
-        String methodName = uri.getLastPathSegment();
-        String paramsJson = uri.getQueryParameter("params");
-        JSONObject param = new JSONObject(paramsJson);
+        List<String> segs = uri.getPathSegments();
+        if (segs == null || segs.size() != 2) {
+            throw new IllegalArgumentException("route url is invalid.");
+        }
+
+        String serviceName = segs.get(0);
+        String methodName = segs.get(1);
+
+        Set<String> queryNames = uri.getQueryParameterNames();
+        Map<String, String> parms = new HashMap<>();
+        if (queryNames != null && !queryNames.isEmpty()) {
+            for (String key : queryNames) {
+                parms.put(key, uri.getQueryParameter(key));
+            }
+        }
 
         Log.e(TAG, "route url=" + url);
 
-        Log.e(TAG, String.format("serviceName=%s,methodName=%s,paramsJson=%s", serviceName, methodName, paramsJson));
+        Log.e(TAG, String.format("serviceName=%s,methodName=%s,params: %s", serviceName, methodName, uri.getQuery()));
 
-        return service(serviceName).methodName(methodName).args(param).invoke();
+        return service(serviceName).methodName(methodName).args(parms).invokeByPath();
 
     }
 
@@ -97,10 +141,14 @@ public class RouteManager {
             return this;
         }
 
-        public <T> T invoke() throws Exception {
+        private <T> T invokeByPath() throws Exception {
 
-            return (T) callMethod(serviceName, methodName, args, parameterTypes);
+            return (T) callMethodByPath(serviceName, methodName, args);
 
+        }
+
+        public <T> T invokeDirect() throws Exception {
+            return (T) callMethodDirect(serviceName, methodName, args, parameterTypes);
         }
     }
 

@@ -16,16 +16,14 @@ public class MainActivity extends AppCompatActivity {
             RouteManager.service("com.demo.account")
                     .methodName("login")
                     .args("lisi", "123456")
-                    .invoke();
+                    .invokeDirect();
         } catch (Exception e) {
             e.printStackTrace();
         }
 
 
-
-
         try {
-           boolean isRegisterSuccess= RouteManager.route("myapp://com.demo.account/register?params={'name':'ch','pwd':'123'}");
+            boolean isRegisterSuccess = RouteManager.route("myapp://com.babytree/mt/register?name=lich&age=100");
         } catch (Exception e) {
             e.printStackTrace();
         }
