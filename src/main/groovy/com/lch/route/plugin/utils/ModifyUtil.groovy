@@ -24,7 +24,8 @@ public class ModifyUtil implements Opcodes {
         try {
 
 
-            List<ClassVisitor> visitors = Config.project.route.visitors;
+
+            List<ClassVisitor> visitors = Config.visitors;
             Logg.e("!!!!!!!!!!!!!!!!!!!!!!!!!!!!=" + visitors.size());
 
             for (ClassVisitor visitor : visitors) {

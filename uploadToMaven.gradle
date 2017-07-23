@@ -27,7 +27,7 @@ uploadArchives {
                 // repository(url: uri("C:\\Users\\Administrator\\.m2\\repository"))
 
                 pom.project {
-                    version '2.0.40'
+                    version '2.0.55'
                     artifactId ARTIFACTID
                     groupId GROUPID
                     packaging PACKAGING

@@ -1,5 +1,4 @@
 apply plugin: 'com.android.application'
-apply plugin: 'com.lch.route.plugin'
 
 android {
     compileSdkVersion rootProject.ext.compileSdkVersion
@@ -41,81 +40,17 @@ dependencies {
     compile project(':route-runtime')
 
    // compile 'com.lch.route:route-runtime:+'
-   // compile "org.ow2.asm:asm-all:5.0"
+    compile "org.ow2.asm:asm-all:5.0"
 
 
 
 }
 
 
-import org.objectweb.asm.ClassVisitor
-import org.objectweb.asm.MethodVisitor
-
-public class MyVisitor extends ClassVisitor {
-
-    String className;
-
-    public MyVisitor(int i) {
-        super(i)
-    }
-
-    public MyVisitor(int i, ClassVisitor classVisitor) {
-        super(i, classVisitor)
-    }
-
-    @Override
-    public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
-        super.visit(version, access, name, signature, superName, interfaces);
-        println "TestVisitor visit:" + name
-        className = name
-    }
-
-    @Override
-    MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
-        MethodVisitor old = super.visitMethod(access, name, desc, signature, exceptions)
-
-        if (!className.contains("MainActivity")||!name.equals("test")) {
-            return old
-        }
-
-        println "*************************** visit:" + className+";"+name
-
-        return new CtrMethodVisitor(org.objectweb.asm.Opcodes.ASM5, old);
-
-    }
-
-    private static class CtrMethodVisitor extends MethodVisitor {
-
-        public CtrMethodVisitor(int api) {
-            super(api);
-        }
-
-        public CtrMethodVisitor(int api, MethodVisitor mv) {
-            super(api, mv);
-        }
-
-        @Override
-        void visitCode() {
-            super.visitCode()
-
-            super.visitLdcInsn("tag");
-            super.visitLdcInsn("xxxxj");
-           // 下面这行代码 为要调用的方法，请酌情修改
-            super.visitMethodInsn(org.objectweb.asm.Opcodes.INVOKESTATIC,
-                    "com/lch/demo/MainActivity",
-                    "hookXM", "(Ljava/lang/Object;Ljava/lang/Object;)V");
-
-
-        }
-
-
-
-
-    }
-}
-
+apply plugin: 'com.lch.route.plugin'
 
 route {
-    visitors = [new MyVisitor(org.objectweb.asm.Opcodes.ASM5),new MyVisitor(org.objectweb.asm.Opcodes.ASM5)]
+    visitors = ["com.lch.demo.Jvi","com.lch.demo.MyVisitor2"]
+    //visitors = [new MyVisitor2(org.objectweb.asm.Opcodes.ASM5),new MyVisitor2(org.objectweb.asm.Opcodes.ASM5)]
 }
 

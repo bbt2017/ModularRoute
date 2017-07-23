@@ -51,6 +51,27 @@ public class InjectTransform extends Transform {
 
         Logg.i("==============route transform enter==============")
 
+        def classPaths = []
+
+        inputs.each { TransformInput input ->
+            input.directoryInputs.each { DirectoryInput directoryInput ->
+                classPaths.add(directoryInput.file.absolutePath)
+
+            }
+
+            input.jarInputs.each { JarInput jarInput ->
+                classPaths.add(jarInput.file.absolutePath)
+
+            }
+        }
+
+        def paths = [Config.project.android.bootClasspath.get(0).absolutePath/*, injectClassPath*/]
+        paths.addAll(classPaths)
+
+
+        Config.initVisitors(paths)
+
+
         long begin = System.currentTimeMillis();
 
         inputs.each { TransformInput input ->
