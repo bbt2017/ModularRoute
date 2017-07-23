@@ -9,6 +9,7 @@ import org.objectweb.asm.ClassVisitor
 import org.objectweb.asm.ClassWriter
 import org.objectweb.asm.Opcodes
 
+import java.lang.reflect.Field
 import java.util.jar.JarEntry
 import java.util.jar.JarFile
 import java.util.jar.JarOutputStream
@@ -21,17 +22,44 @@ public class ModifyUtil implements Opcodes {
         Logg.i("modifyClasses className========" + className);
 
         try {
+
+
+            List<ClassVisitor> visitors = Config.project.route.visitors;
+            Logg.e("!!!!!!!!!!!!!!!!!!!!!!!!!!!!=" + visitors.size());
+
+            for (ClassVisitor visitor : visitors) {
+                ClassReader reader = new ClassReader(srcByteCode);
+                ClassWriter writer = new ClassWriter(reader, 0);
+
+                setParentVisitor(visitor, writer)
+                reader.accept(visitor, ClassReader.EXPAND_FRAMES)
+
+                srcByteCode = writer.toByteArray();
+            }
+
             ClassReader reader = new ClassReader(srcByteCode);
             ClassWriter writer = new ClassWriter(reader, 0);
+
             ClassVisitor visitor = new RouteServiceVisitor(Opcodes.ASM5, writer);
             reader.accept(visitor, ClassReader.EXPAND_FRAMES)
-
             srcByteCode = writer.toByteArray();
 
         } catch (Exception e) {
             e.printStackTrace();
         }
         return srcByteCode;
+    }
+
+    private static void setParentVisitor(ClassVisitor visitor, ClassVisitor parent) {
+        try {
+            Field cv_field = ClassVisitor.class.getDeclaredField("cv");
+            cv_field.setAccessible(true);
+            cv_field.set(visitor, parent);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
     }
 
 

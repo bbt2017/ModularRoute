@@ -5,10 +5,12 @@ import com.android.build.gradle.BaseExtension
 import com.android.build.gradle.LibraryExtension
 import com.lch.route.plugin.util.Logg
 import com.lch.route.plugin.utils.Config
+import com.lch.route.plugin.visitor.RouteServiceVisitor
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.objectweb.asm.Opcodes
 
-class PluginImpl implements Plugin<Project> {
+class PluginImpl implements Plugin<Project> , Opcodes{
     @Override
     void apply(Project project) {
         Logg.i(":applied RoutePlugin===================================");
@@ -20,6 +22,8 @@ class PluginImpl implements Plugin<Project> {
         project.extensions.create('route', PluginExtension)
 
         Config.setProject(project);
+
+
         registerTransform(plugin);
         initDir(project);
     }

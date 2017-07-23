@@ -21,18 +21,101 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_7
+        targetCompatibility JavaVersion.VERSION_1_7
+    }
 }
 
+sourceCompatibility = 1.7
+targetCompatibility = 1.7
+
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
+    compile fileTree(include: ['*.jar'], dir: 'libs')
     androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
-    compile 'com.android.support:appcompat-v7:25.1.1'
-    compile 'com.android.support.constraint:constraint-layout:1.0.0-alpha7'
+    compile 'com.android.support:appcompat-v7:+'
+    compile 'com.android.support.constraint:constraint-layout:+'
     testCompile 'junit:junit:4.12'
-
     compile project(':route-runtime')
+
+   // compile 'com.lch.route:route-runtime:+'
+   // compile "org.ow2.asm:asm-all:5.0"
+
+
+
 }
 
+
+import org.objectweb.asm.ClassVisitor
+import org.objectweb.asm.MethodVisitor
+
+public class MyVisitor extends ClassVisitor {
+
+    String className;
+
+    public MyVisitor(int i) {
+        super(i)
+    }
+
+    public MyVisitor(int i, ClassVisitor classVisitor) {
+        super(i, classVisitor)
+    }
+
+    @Override
+    public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
+        super.visit(version, access, name, signature, superName, interfaces);
+        println "TestVisitor visit:" + name
+        className = name
+    }
+
+    @Override
+    MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
+        MethodVisitor old = super.visitMethod(access, name, desc, signature, exceptions)
+
+        if (!className.contains("MainActivity")||!name.equals("test")) {
+            return old
+        }
+
+        println "*************************** visit:" + className+";"+name
+
+        return new CtrMethodVisitor(org.objectweb.asm.Opcodes.ASM5, old);
+
+    }
+
+    private static class CtrMethodVisitor extends MethodVisitor {
+
+        public CtrMethodVisitor(int api) {
+            super(api);
+        }
+
+        public CtrMethodVisitor(int api, MethodVisitor mv) {
+            super(api, mv);
+        }
+
+        @Override
+        void visitCode() {
+            super.visitCode()
+
+            super.visitLdcInsn("tag");
+            super.visitLdcInsn("xxxxj");
+           // 下面这行代码 为要调用的方法，请酌情修改
+            super.visitMethodInsn(org.objectweb.asm.Opcodes.INVOKESTATIC,
+                    "com/lch/demo/MainActivity",
+                    "hookXM", "(Ljava/lang/Object;Ljava/lang/Object;)V");
+
+
+        }
+
+
+
+
+    }
+}
+
+
+route {
+    visitors = [new MyVisitor(org.objectweb.asm.Opcodes.ASM5),new MyVisitor(org.objectweb.asm.Opcodes.ASM5)]
+}
 
