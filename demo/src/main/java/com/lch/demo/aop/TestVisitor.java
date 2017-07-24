@@ -1,19 +1,17 @@
-package com.lch.demo;
-
-import android.util.Log;
+package com.lch.demo.aop;
 
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.MethodVisitor;
 
-public class MyVisitor2 extends ClassVisitor {
+public class TestVisitor extends ClassVisitor {
 
     String className;
 
-    public MyVisitor2(int i) {
+    public TestVisitor(int i) {
         super(i);
     }
 
-    public MyVisitor2(int i, ClassVisitor classVisitor) {
+    public TestVisitor(int i, ClassVisitor classVisitor) {
         super(i, classVisitor);
     }
 
@@ -22,7 +20,6 @@ public class MyVisitor2 extends ClassVisitor {
         super.visit(version, access, name, signature, superName, interfaces);
         System.err.print("TestVisitor visit:" + name);
         className = name;
-        Log.e("l","s");
     }
 
     @Override

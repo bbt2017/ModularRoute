@@ -4,45 +4,66 @@ import com.android.build.gradle.AppExtension
 import com.android.build.gradle.BaseExtension
 import com.android.build.gradle.LibraryExtension
 import com.lch.route.plugin.util.Logg
-import com.lch.route.plugin.utils.Config
-import com.lch.route.plugin.visitor.RouteServiceVisitor
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.objectweb.asm.Opcodes
 
-class PluginImpl implements Plugin<Project> , Opcodes{
+class PluginImpl implements Plugin<Project>, Opcodes {
+
+    public static final int TYPE_APP = 1;
+    public static final int TYPE_LIB = 2;
+
+    public static PluginImpl INSTANCE;
+
+
+    public Project mProject;
+
+    public InjectTransform transform
+
+    public int projectType
+
+    public File routeDir
+
+    public File routeTempDir
+
     @Override
     void apply(Project project) {
         Logg.i(":applied RoutePlugin===================================");
+        INSTANCE = this;
+
+        mProject = project
+
         BaseExtension plugin = project.extensions.getByType(BaseExtension)
 
         if (!(plugin instanceof AppExtension)) {
             throw new IllegalStateException("'android-application' plugin required.")
         }
-        project.extensions.create('route', PluginExtension)
+        project.extensions.create('LchAop', PluginExtension)
 
-        Config.setProject(project);
-
-
-        registerTransform(plugin);
-        initDir(project);
-    }
-
-
-    private static registerTransform(BaseExtension plugin) {
-        if (plugin instanceof LibraryExtension) {
-            Config.ext.projectType = Config.TYPE_LIB;
-        } else if (plugin instanceof AppExtension) {
-            Config.ext.projectType = Config.TYPE_APP;
-        } else {
-            Config.ext.projectType = -1
-        }
-        InjectTransform transform = new InjectTransform()
+        transform = new InjectTransform()
         plugin.registerTransform(transform)
+
+        initDir(project);
+
+        detectProjectType()
     }
 
 
-    private static void initDir(Project project) {
+    private  void detectProjectType(BaseExtension plugin) {
+
+        if (plugin instanceof LibraryExtension) {
+            projectType = TYPE_LIB;
+        } else if (plugin instanceof AppExtension) {
+            projectType = TYPE_APP;
+        } else {
+            projectType = -1
+        }
+
+    }
+
+
+    private  void initDir(Project project) {
+
         File routeDir = new File(project.buildDir, "PluginImpl")
         if (!routeDir.exists()) {
             routeDir.mkdir()
@@ -51,8 +72,8 @@ class PluginImpl implements Plugin<Project> , Opcodes{
         if (!tempDir.exists()) {
             tempDir.mkdir()
         }
-        Config.ext.routeDir = routeDir
-        Config.ext.routeTempDir = tempDir
+        this.routeDir = routeDir
+        this.routeTempDir = tempDir
     }
 
 

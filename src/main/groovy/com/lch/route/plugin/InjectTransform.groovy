@@ -5,15 +5,57 @@ import com.android.annotations.Nullable
 import com.android.build.api.transform.*
 import com.android.build.gradle.internal.pipeline.TransformManager
 import com.lch.route.plugin.util.Logg
-import com.lch.route.plugin.utils.Config
 import com.lch.route.plugin.utils.ModifyUtil
 import com.lch.route.plugin.visitor.Router_Dump
 import groovy.io.FileType
 import org.apache.commons.codec.digest.DigestUtils
 import org.apache.commons.io.FileUtils
 import org.apache.commons.io.IOUtils
+import org.objectweb.asm.ClassVisitor
+import org.objectweb.asm.Opcodes
 
-public class InjectTransform extends Transform {
+import java.lang.reflect.Constructor
+
+public class InjectTransform extends Transform implements Opcodes {
+
+
+    private List<ClassVisitor> visitors = []
+
+
+    public List<ClassVisitor> getVisitors() {
+        return visitors;
+    }
+
+    private void initVisitors(List<String> classpaths) {
+
+
+        Logg.e("initVisitors=======tid:" + Thread.currentThread().id)
+
+
+        URL[] urls = new URL[classpaths.size()]
+
+        for (int i = 0; i < classpaths.size(); i++) {
+
+            urls[i] = new File(classpaths.get(i)).toURL()
+        }
+
+        URLClassLoader classLoader = URLClassLoader.newInstance(urls, this.getClass().getClassLoader())
+
+        List<String> classnames = PluginImpl.INSTANCE.mProject.LchAop.visitors;
+
+        for (String classname : classnames) {
+
+            Class cls = classLoader.loadClass(classname)
+            Constructor ctr = cls.getDeclaredConstructor(int.class)
+            ctr.setAccessible(true)
+            ClassVisitor v = (ClassVisitor) ctr.newInstance(ASM5)
+
+            visitors.add(v)
+        }
+
+
+    }
+
 
     @Override
     String getName() {
@@ -27,9 +69,11 @@ public class InjectTransform extends Transform {
 
     @Override
     Set<QualifiedContent.Scope> getScopes() {
-        if (Config.ext.projectType == Config.TYPE_APP) {
+
+        if (PluginImpl.INSTANCE.projectType == PluginImpl.TYPE_APP) {
             return TransformManager.SCOPE_FULL_PROJECT
-        } else if (Config.ext.projectType == Config.TYPE_LIB) {
+
+        } else if (PluginImpl.INSTANCE.projectType == PluginImpl.TYPE_LIB) {
             return TransformManager.SCOPE_FULL_LIBRARY
         }
         return TransformManager.SCOPE_FULL_PROJECT
@@ -49,7 +93,7 @@ public class InjectTransform extends Transform {
             @Nullable TransformOutputProvider outputProvider,
             boolean isIncremental) throws IOException, TransformException, InterruptedException {
 
-        Logg.i("==============route transform enter==============")
+        Logg.i("==============route transform enter==============:" + this.toString())
 
         def classPaths = []
 
@@ -65,11 +109,10 @@ public class InjectTransform extends Transform {
             }
         }
 
-        def paths = [Config.project.android.bootClasspath.get(0).absolutePath/*, injectClassPath*/]
+        def paths = [PluginImpl.INSTANCE.mProject.android.bootClasspath.get(0).absolutePath/*, injectClassPath*/]
         paths.addAll(classPaths)
 
-
-        Config.initVisitors(paths)
+        initVisitors(paths)
 
 
         long begin = System.currentTimeMillis();
@@ -123,13 +166,19 @@ public class InjectTransform extends Transform {
                 if (dir) {
 
                     HashMap<String, File> modifyMap = new HashMap<>();
-                    dir.traverse(type: FileType.FILES, nameFilter: ~/.*\.class/) {
-                        File classFile ->
-                            File modified = modifyClassFile(dir, classFile, context.getTemporaryDir());
-                            if (modified != null) {
-                                //key为相对路径
-                                modifyMap.put(classFile.absolutePath.replace(dir.absolutePath, ""), modified);
-                            }
+
+                    if (isNeedModifyDirClasses()) {
+
+                        dir.traverse(type: FileType.FILES, nameFilter: ~/.*\.class/) {
+
+                            File classFile ->
+
+                                File modified = modifyClassFile(dir, classFile, context.getTemporaryDir());
+                                if (modified != null) {
+                                    //key为相对路径
+                                    modifyMap.put(classFile.absolutePath.replace(dir.absolutePath, ""), modified);
+                                }
+                        }
                     }
 
 
@@ -138,10 +187,11 @@ public class InjectTransform extends Transform {
                         FileUtils.copyInputStreamToFile(new ByteArrayInputStream(bytes), new File(dest, "com/lch/route/Route_.class"))
                     }
 
-                    FileUtils.copyDirectory(directoryInput.file, dest);
+                    FileUtils.copyDirectory(dir, dest);
 
                     modifyMap.entrySet().each {
                         Map.Entry<String, File> en ->
+
                             File target = new File(dest.absolutePath + en.getKey());
                             Logg.i(target.getAbsolutePath());
                             if (target.exists()) {
@@ -149,36 +199,40 @@ public class InjectTransform extends Transform {
                             }
 
                             FileUtils.copyFile(en.getValue(), target);
+
                             saveModifiedJarForCheck(en.getValue());
+
                             en.getValue().delete();
                     }
                 }
             }
 
-            Logg.e("@@@transform spend time:" + (System.currentTimeMillis() - begin));
 
         }
+
+
+        Logg.e("@@@transform spend time:" + (System.currentTimeMillis() - begin));
+
     }
 
     private static boolean isNeedModifyJar(File jar) {
 
-        List<String> excludeJarName = Config.project.route.excludeJarName;
+        boolean b = PluginImpl.INSTANCE.mProject.LchAop.isNeedModifyJar(jar.absolutePath)
 
-        for (String value : excludeJarName) {
-            boolean isContain = jar.absolutePath.contains(value);
+        Logg.i("isNeedModifyJar:" + b)
 
-            if (isContain) {
-                return false;
-            }
-        }
+        return b;
+    }
 
+    private static boolean isNeedModifyDirClasses() {
 
-        return true;
+        return PluginImpl.INSTANCE.mProject.LchAop.isNeedModifyDirClasses
+
     }
 
 
     private static void saveModifiedJarForCheck(File optJar) {
-        File dir = Config.ext.routeDir;
+        File dir = PluginImpl.INSTANCE.routeDir;
         File checkJarFile = new File(dir, optJar.getName());
         if (checkJarFile.exists()) {
             checkJarFile.delete();

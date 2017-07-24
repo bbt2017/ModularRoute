@@ -1,5 +1,6 @@
 package com.lch.route.plugin.utils
 
+import com.lch.route.plugin.PluginImpl
 import com.lch.route.plugin.util.Logg
 import com.lch.route.plugin.visitor.RouteServiceVisitor
 import org.apache.commons.codec.digest.DigestUtils
@@ -21,14 +22,14 @@ public class ModifyUtil implements Opcodes {
     public static byte[] modifyClasses(String className, byte[] srcByteCode) {
         Logg.i("modifyClasses className========" + className);
 
+
         try {
 
-
-
-            List<ClassVisitor> visitors = Config.visitors;
+            List<ClassVisitor> visitors = PluginImpl.INSTANCE.transform.visitors;
             Logg.e("!!!!!!!!!!!!!!!!!!!!!!!!!!!!=" + visitors.size());
 
             for (ClassVisitor visitor : visitors) {
+
                 ClassReader reader = new ClassReader(srcByteCode);
                 ClassWriter writer = new ClassWriter(reader, 0);
 
@@ -41,13 +42,14 @@ public class ModifyUtil implements Opcodes {
             ClassReader reader = new ClassReader(srcByteCode);
             ClassWriter writer = new ClassWriter(reader, 0);
 
-            ClassVisitor visitor = new RouteServiceVisitor(Opcodes.ASM5, writer);
+            ClassVisitor visitor = new RouteServiceVisitor(ASM5, writer);
             reader.accept(visitor, ClassReader.EXPAND_FRAMES)
             srcByteCode = writer.toByteArray();
 
         } catch (Exception e) {
             e.printStackTrace();
         }
+
         return srcByteCode;
     }
 

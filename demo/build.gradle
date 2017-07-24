@@ -49,8 +49,15 @@ dependencies {
 
 apply plugin: 'com.lch.route.plugin'
 
-route {
-    visitors = ["com.lch.demo.Jvi","com.lch.demo.MyVisitor2"]
-    //visitors = [new MyVisitor2(org.objectweb.asm.Opcodes.ASM5),new MyVisitor2(org.objectweb.asm.Opcodes.ASM5)]
+LchAop {
+    visitors = ["com.lch.demo.aop.TimeLogVisitor","com.lch.demo.aop.TestVisitor"]
+
+    isNeedModifyJar={ jarAbsPath->
+
+        return true
+
+    }
+
+    isNeedModifyDirClasses=true
 }
 
