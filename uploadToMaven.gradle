@@ -2,8 +2,8 @@ apply plugin: 'maven'
 
 def IS_RELEASE = false
 
-def GROUPID = "com.lch.route"
-def ARTIFACTID = "route-plugin"
+def GROUPID = "com.lch.open"
+def ARTIFACTID = "route-aop"
 def PACKAGING = "jar"
 
 
@@ -23,11 +23,11 @@ uploadArchives {
                 }
             } else {
 
-               repository(url: uri("/Users/lichenghang/.m2/repository"))
-                // repository(url: uri("C:\\Users\\Administrator\\.m2\\repository"))
+               //repository(url: uri("/Users/lichenghang/.m2/repository"))
+                 repository(url: uri("C:\\Users\\Administrator\\.m2\\repository"))
 
                 pom.project {
-                    version '2.0.70'
+                    version '3.0'
                     artifactId ARTIFACTID
                     groupId GROUPID
                     packaging PACKAGING

@@ -47,7 +47,7 @@ dependencies {
 }
 
 
-apply plugin: 'com.lch.route.plugin'
+apply plugin: 'com.lch.open.route-aop'
 
 LchAop {
     visitors = ["com.lch.demo.aop.TimeLogVisitor","com.lch.demo.aop.TestVisitor"]
